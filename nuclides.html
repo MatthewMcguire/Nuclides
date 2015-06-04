@@ -4,18 +4,38 @@
   <meta charset="utf-16">
   <title>Table of Nuclides</title>
   <style>
-    .boundary {
+    .boundary 
+    {
       fill: none;
       stroke: #888;
       stroke-linejoin: round;
     }
-    svg {
+    .nuclideCell 
+    {
+      fill: none;
+      stroke: #888;
+      stroke-linejoin: round;
+    }
+    .yAxis path,
+    .yAxis line 
+    {
+      stroke: #444;
+      stroke-opacity: .7;
+      shape-rendering: crispEdges;
+    }
+    .yAxis text
+    {
+    font-family: sans-serif;
+    font-size: 11px;
+    }
+    svg 
+    {
       border-style: solid;
       border-width: 1px;
       border-color: #ccc;
     }
-   /* New class for the overlay zoom */
-    .overlay {
+    .overlay 
+    {
       fill: none;
       pointer-events: all;
     }
@@ -26,9 +46,9 @@
   <div id="nuclideMap"></div>
   <script src="http://d3js.org/d3.v3.min.js"></script>
   <script>
-  var whiteSpace = {left:15, right:15, top:15, bottom:35};
+  var whiteSpace = {left:15, right:15, top:15, bottom:30};
   var height = 800-(whiteSpace.bottom + whiteSpace.top);
-  var width = 800-(whiteSpace.left + whiteSpace.right);
+  var width = 1030-(whiteSpace.left + whiteSpace.right);
 
   // New function
   var zooming = function () {
@@ -67,19 +87,53 @@
     var zHigh = d3.max(data,function(d) { return d.z});
     var nLow = d3.min(data,function(d) { return d.n});
     var nHigh = d3.max(data,function(d) { return d.n});
-    console.log("zLow = " + zLow);
-    console.log("zHigh = " + zHigh);
-    console.log("nLow = " + nLow);
-    console.log("nHigh = " + nHigh);
+      console.log("zLow = " + zLow);
+      console.log("zHigh = " + zHigh);
+      console.log("nLow = " + nLow);
+      console.log("nHigh = " + nHigh);
+    var unitWidth = Math.floor(width/(nHigh-nLow));
+    var unitHeight = Math.floor(height/(zHigh-zLow));
+      console.log("unitWidth = " + unitWidth);
+      console.log("unitHeight = " + unitHeight);  
+
+    var xScale = d3.scale.linear()
+      .range([nLow, nHigh]);
+    var yScale = d3.scale.linear()
+      .range([zLow, zHigh]);
+
+    var xAxis = d3.svg.axis();
+    xAxis.scale(xScale)
+         .orient("bottom");
+    var yAxis = d3.svg.axis();
+    yAxis.scale(yScale)
+         .orient("left");
+
+      // .tickSize(-width)
+      // .tickFormat(function(d) { return d.z; });
+  
+
 
     var nuclideSquares = svg.selectAll("rect")
        .data(data);
     nuclideSquares.enter()
         .append('rect')
-        .attr('x', function(d) {return d.n * 5;})
-        .attr('y', function(d) {return d.z * 5;})
-        .attr('width', 5)
-        .attr('height', 5);
+        .attr('x', function(d) {return (d.n * unitWidth)+whiteSpace.left;})
+        .attr('y', function(d) {return ((height - whiteSpace.bottom) - d.z * unitHeight);})
+        .attr('width', unitWidth)
+        .attr('height', unitHeight)
+        .attr('class', 'nuclideCell');
+
+    svg.append("g")
+      .attr("class", "yAxis")
+      // .attr("transform", "translate(" + width + ",0)")
+      .call(yAxis);
+    svg.append("g")
+      .attr("class", "xAxis")
+      // .attr("transform", "translate(" + width + ",0)")
+      .call(xAxis);
+    // .selectAll("g")
+    // .filter(function(value) { return !value; })
+    //   .classed("zero", true);
 
     //   return
     //   {
@@ -98,8 +152,8 @@
     // {
     //   console.log(rows);
     // }
-    var arr = Object.keys(data).map(function (key) {return data[key]});
-    console.log(Object.keys(data));
+    // var arr = Object.keys(data).map(function (key) {return data[key]});
+    // console.log(Object.keys(data));
     });
  </script>
 </body>
